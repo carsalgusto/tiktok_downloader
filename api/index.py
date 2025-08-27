@@ -10,17 +10,19 @@ import threading
 from urllib.parse import quote
 
 # Adicionar o diretório atual ao path para importar o módulo
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from tiktok_downloader_alternative import download_tiktok_content_alternative
 
 app = Flask(__name__)
 
-CORS(app)  # Adicionando suporte a CORS
-@app.route('/') 
+# Configurar CORS para permitir requisições do frontend
+CORS(app)
+
+@app.route('/')
 def index():
     """Servir a página HTML principal"""
-    return send_file('index.html')
+    return send_file('../index.html')
 
 @app.route('/download', methods=['POST'])
 def download():
@@ -137,6 +139,16 @@ def download_file():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+# Handler para o Vercel
+def handler(request):
+    from flask import Response
+    with app.app_context():
+        response = app.full_dispatch_request()
+        return Response(response=response.get_data(),
+                       status=response.status_code,
+                       headers=dict(response.headers))
+
+# Para desenvolvimento local
 if __name__ == '__main__':
     print("🚀 Servidor TikTok Downloader iniciando...")
     print("📱 Acesse: http://localhost:5000")
