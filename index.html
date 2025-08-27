@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carlos SSTik</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 500px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .input-group {
+            margin: 20px 0;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .buttons {
+            display: flex;
+            gap: 10px;
+        }
+        button {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .btn-video {
+            background: #007bff;
+            color: white;
+        }
+        .btn-audio {
+            background: #28a745;
+            color: white;
+        }
+        .status {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .loading {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+    </style>
+</head>
+<body>
+    <h1>Carlos SSTik</h1>
+    
+    <div class="input-group">
+        <input type="url" id="tiktokUrl" placeholder="Cole o link do TikTok" required>
+    </div>
+    
+    <div class="buttons">
+        <button class="btn-video" onclick="downloadContent('video')">
+            Baixar Video
+        </button>
+        <button class="btn-audio" onclick="downloadContent('audio')">
+            Baixar Audio
+        </button>
+    </div>
+    
+    <div id="status" class="status"></div>
+
+    <script>
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = message;
+            statusDiv.className = 'status ' + type;
+        }
+        
+        function downloadContent(contentType) {
+            const url = document.getElementById('tiktokUrl').value.trim();
+            
+            if (!url) {
+                showStatus('Por favor, cole um link do TikTok', 'error');
+                return;
+            }
+            
+            showStatus('Processando...', 'loading');
+            
+            fetch('/download', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    url: url,
+                    contentType: contentType
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showStatus('Download pronto!', 'success');
+                    // Criar link de download automático
+                    window.location.href = data.downloadUrl;
+                } else {
+                    showStatus('Erro: ' + data.message, 'error');
+                }
+            })
+            .catch(error => {
+                showStatus('Erro de conexão', 'error');
+                console.error('Erro:', error);
+            });
+        }
+    </script>
+</body>
+</html>
